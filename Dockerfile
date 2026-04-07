@@ -12,7 +12,7 @@ WORKDIR /app
 COPY --from=builder /install /usr/local
 COPY app/ ./app/
 
-# Donner la propriété de /app à l'utilisateur app
+# Give ownership of the app directory to the app user
 RUN chown -R app:app /app
 
 USER app

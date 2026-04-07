@@ -10,7 +10,7 @@ from app.database import Base, get_db
 engine = create_engine(
     "sqlite:///:memory:",
     connect_args={"check_same_thread": False},
-    poolclass=StaticPool,  # toujours la même connexion → même base en mémoire
+    poolclass=StaticPool,  # Always use the same connection for in-memory SQLite (important for tests)
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -35,9 +35,7 @@ def setup_db():
 
 client = TestClient(app)
 
-# ... reste des tests inchangé
-
-# ── Tests ──────────────────────────────────────────────────────────────────────
+# Tests for Task API endpoints
 
 def test_health_check():
     response = client.get("/health")
@@ -46,42 +44,42 @@ def test_health_check():
 
 
 def test_create_task():
-    response = client.post("/tasks/", json={"title": "Apprendre Docker"})
+    response = client.post("/tasks/", json={"title": "Learn Docker"})
     assert response.status_code == 201
     data = response.json()
-    assert data["title"] == "Apprendre Docker"
+    assert data["title"] == "Learn Docker"
     assert data["completed"] is False
     assert "id" in data
 
 
 def test_create_task_with_description():
     response = client.post("/tasks/", json={
-        "title": "Lire la doc",
-        "description": "Lire la doc Terraform"
+        "title": "Learn Terraform",
+        "description": "Learn Terraform documentation"
     })
     assert response.status_code == 201
-    assert response.json()["description"] == "Lire la doc Terraform"
+    assert response.json()["description"] == "Learn Terraform documentation"
 
 
 def test_create_task_empty_title():
-    """Un titre vide doit être rejeté — Pydantic valide min_length=1."""
+    """An empty title should trigger a validation error."""
     response = client.post("/tasks/", json={"title": ""})
     assert response.status_code == 422
 
 
 def test_list_tasks():
-    client.post("/tasks/", json={"title": "Tâche A"})
-    client.post("/tasks/", json={"title": "Tâche B"})
+    client.post("/tasks/", json={"title": "Task A"})
+    client.post("/tasks/", json={"title": "Task B"})
     response = client.get("/tasks/")
     assert response.status_code == 200
     assert len(response.json()) == 2
 
 
 def test_get_task():
-    created = client.post("/tasks/", json={"title": "Ma tâche"}).json()
+    created = client.post("/tasks/", json={"title": "My task"}).json()
     response = client.get(f"/tasks/{created['id']}")
     assert response.status_code == 200
-    assert response.json()["title"] == "Ma tâche"
+    assert response.json()["title"] == "My task"
 
 
 def test_get_task_not_found():
@@ -91,30 +89,29 @@ def test_get_task_not_found():
 
 
 def test_update_task():
-    created = client.post("/tasks/", json={"title": "Ancien titre"}).json()
+    created = client.post("/tasks/", json={"title": "Old title"}).json()
     response = client.patch(f"/tasks/{created['id']}", json={
-        "title": "Nouveau titre",
+        "title": "New title",
         "completed": True
     })
     assert response.status_code == 200
-    assert response.json()["title"] == "Nouveau titre"
+    assert response.json()["title"] == "New title"
     assert response.json()["completed"] is True
 
 
 def test_update_task_partial():
     """PATCH partiel — seul completed change, title reste intact."""
-    created = client.post("/tasks/", json={"title": "Titre intact"}).json()
+    created = client.post("/tasks/", json={"title": "Old title"}).json()
     response = client.patch(f"/tasks/{created['id']}", json={"completed": True})
     assert response.status_code == 200
-    assert response.json()["title"] == "Titre intact"  # pas écrasé
+    assert response.json()["title"] == "Old title"  
     assert response.json()["completed"] is True
 
 
 def test_delete_task():
-    created = client.post("/tasks/", json={"title": "À supprimer"}).json()
+    created = client.post("/tasks/", json={"title": "To delete"}).json()
     response = client.delete(f"/tasks/{created['id']}")
     assert response.status_code == 204
-    # Vérifier que c'est vraiment supprimé
     response = client.get(f"/tasks/{created['id']}")
     assert response.status_code == 404
 

@@ -10,7 +10,7 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - .:/app   # hot-reload : tes modifications sont visibles instantanément
+      - .:/app # hot-reload for development
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     restart: unless-stopped
 
@@ -28,7 +28,7 @@ services:
       timeout: 3s
       retries: 10
     ports:
-      - "5432:5432"   # utile pour inspecter la DB avec un outil comme DBeaver
+      - "5432:5432"
 
 volumes:
   postgres_data:

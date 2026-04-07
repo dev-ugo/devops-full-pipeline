@@ -8,7 +8,7 @@ DATABASE_URL = os.getenv(
     "sqlite:///./dev.db",
 )
 
-# connect_args seulement pour SQLite (les tests l'utiliseront encore)
+# connect_args only needed for SQLite. For other databases, it can be left empty.
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
 engine = create_engine(DATABASE_URL, connect_args=connect_args)

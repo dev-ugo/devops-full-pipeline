@@ -2,12 +2,11 @@ from fastapi import FastAPI
 from app.routers import tasks
 from app.database import engine, Base
 
-# Crée les tables si elles n'existent pas encore
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="DevOps Showcase API",
-    description="API de démonstration - projet portfolio DevOps",
+    title="DevOps simple API",
+    description="Demonstration API - portfolio project DevOps",
     version="1.0.0",
 )
 

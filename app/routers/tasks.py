@@ -8,7 +8,6 @@ from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse
 
 router = APIRouter()
 
-
 @router.get("/", response_model=List[TaskResponse])
 def list_tasks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return db.query(Task).offset(skip).limit(limit).all()
