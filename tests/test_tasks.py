@@ -4,13 +4,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.main import app
 from app.database import Base, get_db
+from app.main import app
 
 engine = create_engine(
     "sqlite:///:memory:",
     connect_args={"check_same_thread": False},
-    poolclass=StaticPool,  # Always use the same connection for in-memory SQLite (important for tests)
+    poolclass=StaticPool, # Always use the same connection for in-memory SQLite
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -104,7 +104,7 @@ def test_update_task_partial():
     created = client.post("/tasks/", json={"title": "Old title"}).json()
     response = client.patch(f"/tasks/{created['id']}", json={"completed": True})
     assert response.status_code == 200
-    assert response.json()["title"] == "Old title"  
+    assert response.json()["title"] == "Old title"
     assert response.json()["completed"] is True
 
 

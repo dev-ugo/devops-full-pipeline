@@ -1,14 +1,14 @@
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
 
 from app.database import get_db
 from app.models.task import Task
-from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse
+from app.schemas.task import TaskCreate, TaskResponse, TaskUpdate
 
 router = APIRouter()
 
-@router.get("/", response_model=List[TaskResponse])
+@router.get("/", response_model=list[TaskResponse])
 def list_tasks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return db.query(Task).offset(skip).limit(limit).all()
 
